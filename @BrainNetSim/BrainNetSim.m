@@ -152,7 +152,7 @@ classdef BrainNetSim
      
         %% Realization
         function [obj,TS] = Realization(obj,NS)
-            alpha = 0.2;   
+            alpha = 0.1;   
             order = size(obj.ARMatrix,3);
             if isempty(obj.ARMatrix)
                obj = GenerateARMatrix(obj);
@@ -161,7 +161,8 @@ classdef BrainNetSim
             for t = order+1:10000+NS
                 TS_temp = zeros(obj.NodeNum,1);
                 for ord = 1:order
-                    TS_temp = TS_temp + obj.ARMatrix(:,:,ord)'*TS(:,t-ord)+randn(1,1).*alpha;
+                    al = sum(obj.ARMatrix,3);
+                    TS_temp = TS_temp + obj.ARMatrix(:,:,ord)'*TS(:,t-ord)+randn(1,1).*alpha./diag(al+1);
                 end
                 TS(:,t) = TS_temp;
             end
