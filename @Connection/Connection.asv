@@ -1,0 +1,12 @@
+classdef Connection
+    
+    properties
+        FiltType % high, low, bandpass, notch
+        FiltOrder % Order of the filter
+        FiltLF % low cut off for
+        FiltHF %
+        Gain
+        Nodes % array of 2x1 indicating input and output Node numbers
+    end  
+    
+end
