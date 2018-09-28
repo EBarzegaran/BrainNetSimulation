@@ -91,7 +91,7 @@ classdef BrainNetSim
                 'LF'        ,[],...
                 'HF'        ,[],...
                 'Gain'      ,1, ...
-                'Order'     ,6 ...
+                'Order'     ,12 ...
                 );
             Connect1 = Connection();
             % check if the connection exist in the network
@@ -99,7 +99,7 @@ classdef BrainNetSim
                 error ('nodes should be a 2x1 vector indicating the node number of the network');
             end
             %
-            if ~ismember(opt.Type,{'low','high','bandpass'})
+            if ~ismember(opt.Type,{'low','high','bandpass','delay'})
                 error ('No such filter is defined');
             else
                 Connect1.FiltType = opt.Type;
@@ -129,7 +129,7 @@ classdef BrainNetSim
             for n = 1: obj.NodeNum
                 f = obj.Nodes(n).Freq/obj.SF; % first frequency
                 if ~isempty(f)
-                    [r,f]=parameter_search([2*pi*f],obj.Nodes(n).r,1);
+                    [r,f] = parameter_search([2*pi*f],obj.Nodes(n).r,1);
                     [x,y] = pol2cart(f,r);Poles = x+1i*y;
                     [~,a] = zp2tf(0,[Poles conj(Poles)],1);
                     A(n,n,1:numel(a)-1)= -a(2:end);
@@ -140,8 +140,14 @@ classdef BrainNetSim
             for n1 = 1:obj.NodeNum
                 for n2 = 1:obj.NodeNum
                     if ~isempty(obj.Connections(n1,n2).FiltType) && (n1~=n2) 
-                        lf = obj.Connections(n1,n2).LF; hf = obj.Connections(n1,n2).HF;
-                        b1 = fir1(obj.Connections(n1,n2).FiltOrder, [lf hf]./(obj.SF/2),obj.Connections(n1,n2).FiltType);
+                        if sum(ismember(obj.Connections(n1,n2).FiltType,{'high','low','bandpass','stop'}))
+                            lf = obj.Connections(n1,n2).LF; hf = obj.Connections(n1,n2).HF;
+                            b1 = fir1(obj.Connections(n1,n2).FiltOrder, [lf hf]./(obj.SF/2),obj.Connections(n1,n2).FiltType);
+                        elseif strcmp(obj.Connections(n1,n2).FiltType,'delay')
+                            A(n1,n2,obj.Connections(n1,n2).FiltOrder) = 1/obj.Connections(n1,n2).Gain;                           
+                        else
+                            error(['No Filter as ' obj.Connections(n1,n2).FiltType ' is defined']);
+                        end
                         A(n1,n2,1:numel(b1))= b1*obj.Connections(n1,n2).Gain;
                     end
                 end

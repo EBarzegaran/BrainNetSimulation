@@ -1,7 +1,7 @@
 classdef Connection
     
     properties
-        FiltType % high, low, bandpass, notch
+        FiltType % high, low, bandpass,stop, delay
         FiltOrder % Order of the filter
         LF % low cut off for lpf and bpf
         HF % high cut off for hpf and bpf
