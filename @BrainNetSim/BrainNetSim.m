@@ -45,7 +45,8 @@ classdef BrainNetSim
             opt = ParseArgs(varargin,...
                 'TS'      ,'',...
                 'Freq'        ,[],...
-                'r'           ,obj.Nodes(end).r ...
+                'r'           ,obj.Nodes(end).r, ...
+                'Alpha'       , 1 ...
             );
             
             % update node and connection matrices
@@ -58,6 +59,7 @@ classdef BrainNetSim
             obj.Nodes(Node_Number).TS = opt.TS;
             obj.Nodes(Node_Number).r = opt.r;
             obj.Nodes(Node_Number).Number = Node_Number;
+            obj.Nodes(Node_Number).Alpha = opt.alpha;
         end
         
         %% assign internal frequencies
@@ -71,11 +73,11 @@ classdef BrainNetSim
                 % (1) find the node
                 ind = find([obj.Nodes(:).Number] == nodes_num(i));
                 if ~isempty(Freqs{i})
-                    if strcmp(obj.Nodes(nodes_num(ind)).Type,'AR')|| isempty(obj.Nodes(nodes_num(ind)).Type)
-                        obj.Nodes(nodes_num(ind)).Type = 'AR';
-                        obj.Nodes(nodes_num(ind)).Freq = Freqs{i};
+                    if strcmp(obj.Nodes((ind)).Type,'AR')|| isempty(obj.Nodes((ind)).Type)
+                        obj.Nodes((ind)).Type = 'AR';
+                        obj.Nodes((ind)).Freq = Freqs{i};
                     else
-                        error(['Unable to assign Freq to node' num2str(nodes_num(ind)) '. Check the type of node and change it to AR if necessary.'])
+                        error(['Unable to assign Freq to node' num2str((ind)) '. Check the type of node and change it to AR if necessary.'])
                     end                    
                 end
             end
@@ -136,7 +138,7 @@ classdef BrainNetSim
                 end
             end
 
-            % the second part is the Moving average (filters for connections)
+            % the second part is the (filters for connections)
             for n1 = 1:obj.NodeNum
                 for n2 = 1:obj.NodeNum
                     if ~isempty(obj.Connections(n1,n2).FiltType) && (n1~=n2) 
@@ -158,7 +160,7 @@ classdef BrainNetSim
      
         %% Realization
         function [obj,TS] = Realization(obj,NS)
-            alpha = 0.1;   
+            alpha = 1./(obj.SF/2);   
             order = size(obj.ARMatrix,3);
             if isempty(obj.ARMatrix)
                obj = GenerateARMatrix(obj);
@@ -166,9 +168,10 @@ classdef BrainNetSim
             TS = zeros(obj.NodeNum,order);
             for t = order+1:10000+NS
                 TS_temp = zeros(obj.NodeNum,1);
+                NAlpha = [obj.Nodes(:).Alpha]';
                 for ord = 1:order
-                    al = sum(obj.ARMatrix,3);
-                    TS_temp = TS_temp + obj.ARMatrix(:,:,ord)'*TS(:,t-ord)+randn(1,1).*alpha./diag(al+1);
+                    al = sum(abs(obj.ARMatrix),3);
+                    TS_temp = TS_temp + obj.ARMatrix(:,:,ord)'*TS(:,t-ord)+(randn(1,1).* NAlpha*alpha);%./(diag(al)+1);
                 end
                 TS(:,t) = TS_temp;
             end

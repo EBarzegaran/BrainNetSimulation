@@ -7,6 +7,7 @@ classdef Node
         TS % Time seris of a realization for that node
         r %r level defines the pole amplitude, between 0 and 1, closer to 1 more oscillatory
         Number
+        Alpha % internal noise level
     end
     
     methods
@@ -21,6 +22,7 @@ classdef Node
                 this(n).TS = [];
                 this(n).r = [];
                 this(n).Number = n;
+                this(n).Alpha = 1;
             end
         end
     end
