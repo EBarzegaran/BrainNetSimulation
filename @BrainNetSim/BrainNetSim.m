@@ -171,7 +171,7 @@ classdef BrainNetSim
                 NAlpha = [obj.Nodes(:).Alpha]';
                 for ord = 1:order
                     al = sum(abs(obj.ARMatrix),3);
-                    TS_temp = TS_temp + obj.ARMatrix(:,:,ord)'*TS(:,t-ord)+(randn(1,1).* NAlpha*alpha);%./(diag(al)+1);
+                    TS_temp = TS_temp + obj.ARMatrix(:,:,ord)'*TS(:,t-ord)+(randn(size(TS_temp,1),1).* NAlpha*alpha);%./(diag(al)+1);
                 end
                 TS(:,t) = TS_temp;
             end
