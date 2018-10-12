@@ -131,7 +131,12 @@ classdef BrainNetSim
             for n = 1: obj.NodeNum
                 f = obj.Nodes(n).Freq/obj.SF; % first frequency
                 if ~isempty(f)
-                    [r,f] = parameter_search([2*pi*f],obj.Nodes(n).r,1);
+                    if numel(f)>1,
+                        P = f(2)/f(1);% to have 1/f properties
+                    else
+                        P = 1;
+                    end
+                    [r,f] = parameter_search([2*pi*f],obj.Nodes(n).r,P);
                     [x,y] = pol2cart(f,r);Poles = x+1i*y;
                     [~,a] = zp2tf(0,[Poles conj(Poles)],1);
                     A(n,n,1:numel(a)-1)= -a(2:end);
