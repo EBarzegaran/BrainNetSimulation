@@ -59,7 +59,7 @@ classdef BrainNetSim
             obj.Nodes(Node_Number).TS = opt.TS;
             obj.Nodes(Node_Number).r = opt.r;
             obj.Nodes(Node_Number).Number = Node_Number;
-            obj.Nodes(Node_Number).Alpha = opt.alpha;
+            obj.Nodes(Node_Number).Alpha = opt.Alpha;
         end
         
         %% assign internal frequencies
